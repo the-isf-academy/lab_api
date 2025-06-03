@@ -1,5 +1,7 @@
 
 poetry.lock
+
+pycache/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

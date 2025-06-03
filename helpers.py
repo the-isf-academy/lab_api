@@ -88,20 +88,6 @@ def update_riddle_stats(id, correct):
 
     return get_one_riddle(id)
 
-def get_random_riddle():
-    conn = get_db_connection()
-
-    riddle = conn.execute(
-        """
-        SELECT *
-        FROM riddles
-        ORDER BY random()
-        LIMIT 1
-        """).fetchone()  
-    
-    conn.close()
-
-    return riddle
 
 def json_riddle(riddle):
     return {
@@ -122,33 +108,18 @@ def json_riddle_answerless(riddle):
         'difficulty': riddle['difficulty']
     }
 
-def get_difficulty(level):
-    conn = get_db_connection()
-
-    difficulty_dict = {
-        'hard': 0.3,
-        'medium': 0.6,
-        'easy': 1.0
-    }
-
-    riddles = conn.execute(
-        """
-        SELECT *
-        FROM riddles
-        WHERE difficulty between 0.3 and 1.0;
-        """).fetchall()  
-    
-    conn.close()
-
-    return riddles
-
 
 if __name__=="__main__":
-    print("-- testing helper functions")
+    print("[testing helper functions]")
 
-    # riddle = get_one_riddle(2)
-    # print(riddle['question'])
-    # print(json_riddle(riddle))
+    print(" -- testing all riddles")
+    all_riddles = get_all_riddles()
+    for riddle in all_riddles[0:3]:
+        print(riddle['id'], riddle['question'])
 
-    for riddle in get_difficulty('easy'):
-        print(riddle['question'])
+    print()
+    print(" -- testing one riddle")
+
+    riddle = get_one_riddle(2)
+    print(riddle['question'])
+    print(json_riddle(riddle))
