@@ -73,31 +73,35 @@ def update_riddle_stats(id, correct):
     )
     conn.commit()
 
-
-    riddle = get_one_riddle(id)
-
-    difficulty_score = riddle['correct_guesses']/riddle['total_guesses']
-    if difficulty_score < 0.3:
-        difficult_level = "hard"
-    elif difficulty_score < 0.6:
-        difficult_level = "medium"
-    elif difficulty_score < 1.0:
-        difficult_level = "easy"
-
     conn.execute(
         """
         UPDATE riddles
         SET 
-            difficulty = ?
+            difficulty = CAST(correct_guesses as FLOAT)/total_guesses
         WHERE id = ?
         """,
-        (difficult_level, id)
+        (id)
     )
 
     conn.commit()
     conn.close()
 
     return get_one_riddle(id)
+
+def get_random_riddle():
+    conn = get_db_connection()
+
+    riddle = conn.execute(
+        """
+        SELECT *
+        FROM riddles
+        ORDER BY random()
+        LIMIT 1
+        """).fetchone()  
+    
+    conn.close()
+
+    return riddle
 
 def json_riddle(riddle):
     return {
@@ -118,3 +122,33 @@ def json_riddle_answerless(riddle):
         'difficulty': riddle['difficulty']
     }
 
+def get_difficulty(level):
+    conn = get_db_connection()
+
+    difficulty_dict = {
+        'hard': 0.3,
+        'medium': 0.6,
+        'easy': 1.0
+    }
+
+    riddles = conn.execute(
+        """
+        SELECT *
+        FROM riddles
+        WHERE difficulty between 0.3 and 1.0;
+        """).fetchall()  
+    
+    conn.close()
+
+    return riddles
+
+
+if __name__=="__main__":
+    print("-- testing helper functions")
+
+    # riddle = get_one_riddle(2)
+    # print(riddle['question'])
+    # print(json_riddle(riddle))
+
+    for riddle in get_difficulty('easy'):
+        print(riddle['question'])
