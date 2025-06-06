@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def index():
-    json = {'message': 'Hello from the ISF Riddles API!'}
+    json = {'message': 'Hello!'}
     return json, 200
 
 @app.route('/all', methods=['GET'])
@@ -22,7 +22,7 @@ def all_riddles():
     return json, 200
 
 @app.route('/new', methods=['POST'])
-def new_riddle():
+def post_new_riddle():
     # get API parameters 
     data = request.get_json()
     question = data.get('question')
