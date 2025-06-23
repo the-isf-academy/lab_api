@@ -26,12 +26,25 @@ def api_one_riddle():
     data = request.get_json()
     id = data.get('id')
     riddle = get_one_riddle(id)
-    print(riddle)
+   
     # error handeling
     if riddle is None:
-        return {'error': 'Post not found'}, 404
+        return {'error': 'Riddle not found'}, 404
     
     return jsonify({'riddle':json_riddle_answerless(riddle)}), 200
+
+@app.route(f'/{BASE_URL}/difficulty', methods=['GET'])
+def api_difficulty_riddle():
+    # get API parameters 
+    data = request.get_json()
+    id = data.get('id')
+    riddle = get_one_riddle(id)
+
+    # error handeling
+    if riddle is None:
+        return {'error': 'Riddle not found'}, 404
+    
+    return jsonify({'riddle':json_riddle_difficulty(riddle)}), 200
 
 @app.route(f'/{BASE_URL}/random', methods=['GET'])
 def api_random_riddle():
@@ -40,7 +53,7 @@ def api_random_riddle():
 
     # error handeling
     if riddle is None:
-        return {'error': 'Post not found'}, 404
+        return {'error': 'Riddle not found'}, 404
     
     return json_riddle_answerless(riddle), 200
 
@@ -67,18 +80,24 @@ def api_guess_riddle():
     data = request.get_json()
     id = data.get('id')
     guess = data.get('guess')
+
     # error handeling
     if not id or not guess:
-        return {'error': 'id and guess are required.'}, 404
+        return {'error': 'id and guess are required.'}, 404 
+
     riddle = get_one_riddle(id)
+
+    if riddle is None:
+        return {'error': 'Riddle not found'}, 404
+
     print(riddle['id'])
 
-#    return {'r':0}
+    # return {'r':0}
 
 
     # error handeling
     if riddle is None:
-        return {'error': 'Post not found'}, 404
+        return {'error': 'Riddle not found'}, 404
 
     if guess == riddle['answer']:
         riddle = update_riddle_stats(id,True)
@@ -86,8 +105,10 @@ def api_guess_riddle():
     
 #    return {'r':0}
     else:
+        print(id)
         riddle = update_riddle_stats(id,False)
         return {'correct': False, 'riddle': json_riddle_answerless(riddle)}, 200
+        # return {'r':0}
 
 
 

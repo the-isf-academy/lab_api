@@ -59,6 +59,8 @@ def new_riddle(question, answer):
     return new_riddle
 
 def update_riddle_stats(id, correct):
+    print('update',id)
+
     conn = get_db_connection()
 
     conn.execute(
@@ -80,7 +82,7 @@ def update_riddle_stats(id, correct):
             difficulty = CAST(correct_guesses as FLOAT)/total_guesses
         WHERE id = ?
         """,
-        (id)
+        (id,)
     )
 
     conn.commit()
@@ -114,6 +116,14 @@ def json_riddle(riddle):
     }
 
 def json_riddle_answerless(riddle):
+    return {
+        'id': riddle['id'],
+        'question': riddle['question'],
+        'total_guesses': riddle['total_guesses'],
+        'correct_guesses': riddle['correct_guesses'],
+    }
+
+def json_riddle_difficulty(riddle):
     return {
         'id': riddle['id'],
         'question': riddle['question'],
