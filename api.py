@@ -23,7 +23,7 @@ def api_all_riddles():
 @app.route(f'/{BASE_URL}/one', methods=['GET'])
 def api_one_riddle():
     if 'id' not in  request.args:
-        return {'error': 'id is required.'}, 404 
+        return {'error': 'id is required.'}, 400 
     
     # get API parameters 
     id = request.args['id']
@@ -40,7 +40,7 @@ def api_one_riddle():
 @app.route(f'/{BASE_URL}/difficulty', methods=['GET'])
 def api_difficulty_riddle():
     if 'id' not in  request.args:
-        return {'error': 'id is required.'}, 404 
+        return {'error': 'id is required.'}, 400 
 
     # get API parameters 
     id = request.args['id']
@@ -67,7 +67,7 @@ def api_random_riddle():
 def api_new_riddle():
     # error handeling
     if 'question' not in  request.args or 'answer' not in request.args:
-        return {'error': 'question and answer are required.'}, 404 
+        return {'error': 'question and answer are required.'}, 400 
     
     # get API parameters 
     question = request.args['question']
@@ -86,7 +86,7 @@ def api_guess_riddle():
 
     # error handeling
     if 'id' not in  request.args or 'guess' not in request.args:
-        return {'error': 'id and guess are required.'}, 404 
+        return {'error': 'id and guess are required.'}, 400 
     
     # get id and guess
     id = request.args['id']
