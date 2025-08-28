@@ -3,38 +3,42 @@ from helpers import *
 
 app = Flask(__name__)
 
+BASE_URL = "riddle"
 
-@app.route('/', methods=['GET'])
+@app.route(f'/{BASE_URL}', methods=['GET'])
 def index():
-    json = {'message': 'Hello!'}
-    return json, 200
+    return {'message': 'Hello from your local Riddle API!'}, 200
 
-@app.route('/all', methods=['GET'])
-def all_riddles():
+@app.route(f'/{BASE_URL}/all', methods=['GET'])
+def api_all_riddles():
     all_riddles = get_all_riddles()
 
     all_riddles_list = []
     for riddle in all_riddles:
         all_riddles_list.append(json_riddle_answerless(riddle))
 
-    json = {'riddles': all_riddles_list}
+    return {'riddles': all_riddles_list}, 200
 
-    return json, 200
 
-@app.route('/new', methods=['POST'])
-def post_new_riddle():
-    # get API parameters 
-    data = request.get_json()
-    question = data.get('question')
-    answer = data.get('answer')
+@app.route(f'/{BASE_URL}/new', methods=['POST'])
+def api_new_riddle():
+    # error handeling
+    if 'question' not in  request.args or 'answer' not in request.args:
+        return {'error': 'question and answer are required.'}, 400 
+    
+    # get payload 
+    question = request.args['question']
+    answer = request.args['answer']
 
+    # get riddle from db
     riddle = new_riddle(question, answer)
 
-    json = {
+    return {
         'message': 'Riddle added successfully.',
-        'question': json_riddle(riddle)}
-    
-    return json, 201
+        'question': json_riddle(riddle)}, 201
+
+
+
 
 
 if __name__ == '__main__':
