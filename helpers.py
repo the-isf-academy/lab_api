@@ -8,7 +8,7 @@ def get_db_connection():
 def get_all_riddles():
     conn = get_db_connection()
 
-    # get all Questions from database
+    # get all riddles from database
     all_riddles = conn.execute(
         """
         SELECT *
@@ -22,7 +22,7 @@ def get_all_riddles():
 def get_one_riddle(id):
     conn = get_db_connection()
 
-    # get all Questions from database
+    # get one riddle from database
     riddle = conn.execute(
         """
         SELECT *
@@ -33,6 +33,22 @@ def get_one_riddle(id):
     conn.close()
 
     return riddle
+
+def get_random_riddle():
+    conn = get_db_connection()
+
+    # get one random riddle fromo database
+    random_riddle = conn.execute(
+            f"""
+            SELECT *
+            from riddles
+            ORDER BY random()
+            limit 1"""
+        ).fetchone()   
+    
+    conn.close()
+
+    return random_riddle
 
 def new_riddle(question, answer):
     conn = get_db_connection()

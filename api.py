@@ -7,7 +7,7 @@ BASE_URL = "riddle"
 
 @app.route(f'/{BASE_URL}', methods=['GET'])
 def index():
-    return {'message': 'Hello from your local Riddle API!'}, 200
+    return {'message': 'Hello from the ISF Riddles API!'}, 200
 
 @app.route(f'/{BASE_URL}/all', methods=['GET'])
 def api_all_riddles():
