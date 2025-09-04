@@ -39,12 +39,11 @@ def get_random_riddle():
 
     # get one random riddle fromo database
     random_riddle = conn.execute(
-            f"""
-            SELECT *
-            from riddles
-            ORDER BY random()
-            limit 1"""
-        ).fetchone()   
+        f"""
+        SELECT *
+        from riddles
+        ORDER BY random()
+        limit 1""").fetchone()   
     
     conn.close()
 
