@@ -1,14 +1,17 @@
 import sqlite3
 
+# DATABASE INTERACTIONS
+
 def get_db_connection():
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row #converts row to dictionary object
     return conn
 
 def get_all_riddles():
+    '''Returns all riddles from the database'''
+
     conn = get_db_connection()
 
-    # get all riddles from database
     all_riddles = conn.execute(
         """
         SELECT *
@@ -20,9 +23,11 @@ def get_all_riddles():
     return all_riddles
 
 def get_one_riddle(id):
+    '''Returns one riddles from the database
+    of a specific id'''
+
     conn = get_db_connection()
 
-    # get one riddle from database
     riddle = conn.execute(
         """
         SELECT *
@@ -35,9 +40,10 @@ def get_one_riddle(id):
     return riddle
 
 def get_random_riddle():
+    '''Returns one random riddle from the database'''
+
     conn = get_db_connection()
 
-    # get one random riddle fromo database
     random_riddle = conn.execute(
         f"""
         SELECT *
@@ -50,6 +56,10 @@ def get_random_riddle():
     return random_riddle
 
 def new_riddle(question, answer):
+    '''Inserts a new riddle into the database
+    Returns the new riddle'''
+
+
     conn = get_db_connection()
     conn.execute(
         """
@@ -74,7 +84,9 @@ def new_riddle(question, answer):
     return new_riddle
 
 def update_riddle_stats(id, correct):
-    print('update',id)
+    '''Updates total_guesses and corect_guesses column
+    for one riddle of a given id'''
+
 
     conn = get_db_connection()
 
@@ -105,6 +117,8 @@ def update_riddle_stats(id, correct):
 
     return get_one_riddle(id)
 
+
+# FORMATS RIDDLE JSON
 
 def json_riddle(riddle):
     return {
