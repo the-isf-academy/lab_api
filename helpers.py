@@ -1,17 +1,14 @@
 import sqlite3
 
-# DATABASE INTERACTIONS
-
 def get_db_connection():
     conn = sqlite3.connect('database.db')
     conn.row_factory = sqlite3.Row #converts row to dictionary object
     return conn
 
 def get_all_riddles():
-    '''Returns all riddles from the database'''
-
     conn = get_db_connection()
 
+    # get all Questions from database
     all_riddles = conn.execute(
         """
         SELECT *
@@ -23,11 +20,9 @@ def get_all_riddles():
     return all_riddles
 
 def get_one_riddle(id):
-    '''Returns one riddles from the database
-    of a specific id'''
-
     conn = get_db_connection()
 
+    # get all Questions from database
     riddle = conn.execute(
         """
         SELECT *
@@ -40,26 +35,48 @@ def get_one_riddle(id):
     return riddle
 
 def get_random_riddle():
-    '''Returns one random riddle from the database'''
-
     conn = get_db_connection()
 
+    # get one random riddle from database
     random_riddle = conn.execute(
         f"""
         SELECT *
         from riddles
         ORDER BY random()
-        limit 1""").fetchone()   
+        limit 1"""
+    ).fetchone()   
     
     conn.close()
 
     return random_riddle
 
+def get_difficulty_riddle(difficulty):
+    conn = get_db_connection()
+    if difficulty == 'hard':
+        lower_level = 0
+        upper_level = 0.3
+    elif difficulty == 'medium':
+        lower_level = 0.3
+        upper_level = 0.6
+    else:
+        lower_level = 0.6
+        upper_level = 1
+
+    # get one random riddle from database
+    difficulty_riddles = conn.execute(
+        f"""
+        SELECT *
+        from riddles
+        WHERE difficulty >= ? AND difficulty <= ?
+
+        """,(lower_level,upper_level,)
+    ).fetchall()
+
+    conn.close()
+
+    return difficulty_riddles
+
 def new_riddle(question, answer):
-    '''Inserts a new riddle into the database
-    Returns the new riddle'''
-
-
     conn = get_db_connection()
     conn.execute(
         """
@@ -84,9 +101,7 @@ def new_riddle(question, answer):
     return new_riddle
 
 def update_riddle_stats(id, correct):
-    '''Updates total_guesses and corect_guesses column
-    for one riddle of a given id'''
-
+    print('update',id)
 
     conn = get_db_connection()
 
@@ -118,8 +133,6 @@ def update_riddle_stats(id, correct):
     return get_one_riddle(id)
 
 
-# FORMATS RIDDLE JSON
-
 def json_riddle(riddle):
     return {
         'id': riddle['id'],
@@ -147,18 +160,22 @@ def json_riddle_difficulty(riddle):
         'difficulty': riddle['difficulty']
     }
 
-
 if __name__=="__main__":
     print("[testing helper functions]")
 
-    print(" -- testing all riddles")
-    all_riddles = get_all_riddles()
-    for riddle in all_riddles[0:3]:
+    # print(" -- testing all riddles")
+    # all_riddles = get_all_riddles()
+    # for riddle in all_riddles[0:3]:
+    #     print(riddle['id'], riddle['question'])
+
+    # print()
+    # print(" -- testing one riddle")
+
+    # riddle = get_one_riddle(2)
+    # print(riddle['question'])
+    # print(json_riddle(riddle))
+
+    easy_riddles = get_difficulty_riddle('hard')
+    print(easy_riddles)
+    for riddle in easy_riddles:
         print(riddle['id'], riddle['question'])
-
-    print()
-    print(" -- testing one riddle")
-
-    riddle = get_one_riddle(2)
-    print(riddle['question'])
-    print(json_riddle(riddle))
