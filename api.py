@@ -22,6 +22,8 @@ def api_all_riddles():
 
 @app.route(f'/{BASE_URL}/one', methods=['GET'])
 def api_one_riddle():
+    print(request.args)
+
     if 'id' not in  request.args:
         return {'error': 'id is required.'}, 400 
     
@@ -33,24 +35,29 @@ def api_one_riddle():
    
     # error handeling
     if riddle is None:
-        return jsonify({'error': 'Riddle not found'}), 404
+        return {'error': 'Riddle not found'}, 404
     
-    return jsonify({'riddle':json_riddle_answerless(riddle)}), 200
+    return {'riddle':json_riddle_answerless(riddle)}, 200
 
 @app.route(f'/{BASE_URL}/difficulty', methods=['GET'])
 def api_difficulty_riddle():
-    if 'id' not in  request.args:
-        return {'error': 'id is required.'}, 400 
+    if 'difficulty' not in  request.args:
+        return {'error': 'difficulty is required.'}, 400 
 
     # get API parameters 
-    id = request.args['id']
-    riddle = get_one_riddle(id)
+    difficulty = request.args['difficulty']
+    print(difficulty)
+    riddles = get_riddles_by_difficulty(difficulty)
+    print(riddles)
 
-    # error handeling
-    if riddle is None:
-        return {'error': 'Riddle not found'}, 404
-    
-    return jsonify({'riddle':json_riddle_difficulty(riddle)}), 200
+    json_riddles = []
+
+    for riddle in riddles:
+        json_riddles.append(json_riddle_answerless(riddle))
+
+    return {
+        'difficuty': difficulty,
+        'riddles': json_riddles}, 200
 
 @app.route(f'/{BASE_URL}/random', methods=['GET'])
 def api_random_riddle():
@@ -80,6 +87,8 @@ def api_new_riddle():
         'message': 'Riddle added successfully.',
         'question': json_riddle(riddle)}, 201
 
+
+
 @app.route(f'/{BASE_URL}/guess', methods=['PUT'])
 def api_guess_riddle():
     # get API parameters 
@@ -102,12 +111,12 @@ def api_guess_riddle():
         return {'error': 'Riddle not found'}, 404
 
     if guess == riddle['answer']:
-        riddle = update_riddle_stats(id,True)
+        riddle = update_riddle_guessed(id,True)
         return {'correct': True, 'riddle': json_riddle(riddle)}, 200
     
     else:
         print(id)
-        riddle = update_riddle_stats(id,False)
+        riddle = update_riddle_guessed(id,False)
         return {'correct': False, 'riddle': json_riddle_answerless(riddle)}, 200
 
 
