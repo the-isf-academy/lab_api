@@ -59,6 +59,27 @@ def update_riddle_guessed(riddle_id, is_correct):
     db_connection.commit()
     db_connection.close()
 
+def update_riddle_difficulty(riddle_id): 
+    db_connection = sqlite3.connect("database.db")
+    db_cursor = db_connection.cursor()
+
+    one_riddle = db_cursor.execute("SELECT * from riddles where id = ? ", (riddle_id ,)).fetchone()
+
+    total_guesses = one_riddle[3]
+    correct_guesses = one_riddle[4]
+
+    if correct_guesses/total_guesses < 0.3:
+        new_difficulty = 'hard'
+    elif 0.3 < correct_guesses/total_guesses< 0.6:
+        new_difficulty = 'medium'
+    else:
+        new_difficulty = 'easy'
+
+
+    db_cursor.execute("UPDATE riddles set difficulty = ?  where id = ? ",(new_difficulty, riddle_id))
+
+    db_connection.commit()
+    db_connection.close()
 
 
 def json_riddle(riddle):
@@ -72,6 +93,7 @@ def json_riddle(riddle):
     }
 
 def json_riddle_answerless(riddle):
+    print(riddle)
     return {
         'id': riddle[0],
         'question': riddle[1],
