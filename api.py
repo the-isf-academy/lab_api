@@ -1,7 +1,30 @@
 from flask import Flask, request,jsonify
 from helpers import *
+from werkzeug.middleware.proxy_fix import ProxyFix
+import logging
 
 app = Flask(__name__)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+@app.before_request
+def log_request_info():
+    # This will run before every single request
+    # Since we used ProxyFix, request.remote_addr is the REAL visitor IP
+    app.logger.info('--- Incoming Request ---')
+    app.logger.info(f"IP: {request.remote_addr}")
+    app.logger.info(f"Path: HTTP {request.method} {request.path}")
+    app.logger.info(f"User Agent: {request.headers.get('User-Agent')}\n")
+
 
 BASE_URL = 'riddle'
 
@@ -31,10 +54,10 @@ def api_help():
             'description': 'Add a new riddle to the database',
             'payload': 'question: str, answer: str'
         },
-        'POST /new':{
+        'POST /guess':{
             'description': 'Guesses a riddle and returns if guess is correct',
             'payload': 'id: int, guess: str'
-        }
+        },
     }
 
     return data, 200
@@ -133,4 +156,4 @@ def api_post_guess_riddle():
         return {'correct': False, 'riddle': json_riddle_answerless(updated_riddle)}, 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,port=8000)

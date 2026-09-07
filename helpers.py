@@ -93,7 +93,6 @@ def json_riddle(riddle):
     }
 
 def json_riddle_answerless(riddle):
-    print(riddle)
     return {
         'id': riddle[0],
         'question': riddle[1],
