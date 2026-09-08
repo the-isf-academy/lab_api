@@ -4,5 +4,5 @@ CREATE TABLE IF NOT EXISTS riddles (
     answer TEXT NOT NULL,
     total_guesses INTEGER DEFAULT 0,
     correct_guesses INTEGER DEFAULT 0,
-    difficulty FLOAT DEFAULT 0.0
+    difficulty FLOAT DEFAULT 'easy'
 );

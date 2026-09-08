@@ -1,164 +1,116 @@
 import sqlite3
 
-# DATABASE INTERACTIONS
+# SQL HELPERS
 
-def get_db_connection():
-    conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row #converts row to dictionary object
-    return conn
 
 def get_all_riddles():
-    '''Returns all riddles from the database'''
+    db_connection = sqlite3.connect("database.db")
+    db_cursor = db_connection.cursor()
 
-    conn = get_db_connection()
+    all_riddles = db_cursor.execute("SELECT * FROM riddles").fetchall()
 
-    all_riddles = conn.execute(
-        """
-        SELECT *
-        FROM riddles
-        """).fetchall()  
-    
-    conn.close()
+    db_connection.close()
 
     return all_riddles
 
-def get_one_riddle(id):
-    '''Returns one riddles from the database
-    of a specific id'''
+def get_one_riddle(riddle_id):
+    db_connection = sqlite3.connect("database.db")
+    db_cursor = db_connection.cursor()
 
-    conn = get_db_connection()
+    one_riddle = db_cursor.execute("SELECT * FROM riddles where id = ?", (riddle_id,)).fetchone()
 
-    riddle = conn.execute(
-        """
-        SELECT *
-        FROM riddles
-        WHERE id=?
-        """,(id,)).fetchone()  
-    
-    conn.close()
+    db_connection.close()
 
-    return riddle
+    return one_riddle
 
-def get_random_riddle():
-    '''Returns one random riddle from the database'''
+def get_riddles_by_difficulty(difficulty):
+    db_connection = sqlite3.connect("database.db")
+    db_cursor = db_connection.cursor()
 
-    conn = get_db_connection()
+    riddles = db_cursor.execute("SELECT * FROM riddles where difficulty = ?", (difficulty,)).fetchall()
 
-    random_riddle = conn.execute(
-        f"""
-        SELECT *
-        from riddles
-        ORDER BY random()
-        limit 1""").fetchone()   
-    
-    conn.close()
+    db_connection.close()
 
-    return random_riddle
+    return riddles
 
 def new_riddle(question, answer):
-    '''Inserts a new riddle into the database
-    Returns the new riddle'''
+    db_connection = sqlite3.connect("database.db")
+    db_cursor = db_connection.cursor()
+    
+    db_cursor.execute("INSERT INTO riddles (question, answer) VALUES (?, ?)",(question, answer))
 
 
-    conn = get_db_connection()
-    conn.execute(
-        """
-        INSERT INTO 
-        riddles (question, answer) 
-        VALUES (?, ?)""",
-        (question, answer)
-    )
-
-    conn.commit()
-
-    new_riddle = conn.execute(
-        """
-        SELECT * 
-        FROM riddles 
-        ORDER BY id desc
-        LIMIT 1
-        """).fetchone()
-
-    conn.close()
-
-    return new_riddle
-
-def update_riddle_stats(id, correct):
-    '''Updates total_guesses and corect_guesses column
-    for one riddle of a given id'''
+    newest_riddle = db_cursor.execute("SELECT * FROM riddles order by id desc limit 1").fetchone()
 
 
-    conn = get_db_connection()
+    db_connection.commit()
 
-    conn.execute(
-        """
-        UPDATE riddles
-        SET 
-            total_guesses = total_guesses + 1,
-            correct_guesses = correct_guesses + CASE WHEN ? THEN 1 ELSE 0 END
-        WHERE id = ?
-        """,
-        (correct, id)
-    )
-    conn.commit()
-
-    conn.execute(
-        """
-        UPDATE riddles
-        SET 
-            difficulty = CAST(correct_guesses as FLOAT)/total_guesses
-        WHERE id = ?
-        """,
-        (id,)
-    )
-
-    conn.commit()
-    conn.close()
-
-    return get_one_riddle(id)
+    return newest_riddle
 
 
-# FORMATS RIDDLE JSON
+
+def update_riddle_guessed(riddle_id, is_correct):
+    db_connection = sqlite3.connect("database.db")
+    db_cursor = db_connection.cursor()
+
+    db_cursor.execute(f"UPDATE riddles set total_guesses = total_guesses + 1  where id = ? ", (riddle_id ,))
+
+    if is_correct == True:
+        db_cursor.execute(f"UPDATE riddles set correct_guesses = correct_guesses + 1  where id = ? ", (riddle_id ,))
+
+
+    db_connection.commit()
+    db_connection.close()
+
+def update_riddle_difficulty(riddle_id): 
+    db_connection = sqlite3.connect("database.db")
+    db_cursor = db_connection.cursor()
+
+    one_riddle = db_cursor.execute("SELECT * from riddles where id = ? ", (riddle_id ,)).fetchone()
+
+    total_guesses = one_riddle[3]
+    correct_guesses = one_riddle[4]
+
+    if correct_guesses/total_guesses < 0.3:
+        new_difficulty = 'hard'
+    elif 0.3 < correct_guesses/total_guesses< 0.6:
+        new_difficulty = 'medium'
+    else:
+        new_difficulty = 'easy'
+
+
+    db_cursor.execute("UPDATE riddles set difficulty = ?  where id = ? ",(new_difficulty, riddle_id))
+
+    db_connection.commit()
+    db_connection.close()
+
+# JSON FORMATTING HELPERS
 
 def json_riddle(riddle):
     return {
-        'id': riddle['id'],
-        'question': riddle['question'],
-        'answer': riddle['answer'],
-        'total_guesses': riddle['total_guesses'],
-        'correct_guesses': riddle['correct_guesses'],
-        'difficulty': riddle['difficulty']
+        'id': riddle[0],
+        'question': riddle[1],
+        'answer': riddle[2],
+        'total_guesses': riddle[3],
+        'correct_guesses': riddle[4],
+        'difficulty': riddle[5]
     }
 
 def json_riddle_answerless(riddle):
     return {
-        'id': riddle['id'],
-        'question': riddle['question'],
-        'total_guesses': riddle['total_guesses'],
-        'correct_guesses': riddle['correct_guesses'],
+        'id': riddle[0],
+        'question': riddle[1],
+        'total_guesses': riddle[3],
+        'correct_guesses': riddle[4],
+        'difficulty': riddle[5]
     }
-
-def json_riddle_difficulty(riddle):
-    return {
-        'id': riddle['id'],
-        'question': riddle['question'],
-        'total_guesses': riddle['total_guesses'],
-        'correct_guesses': riddle['correct_guesses'],
-        'difficulty': riddle['difficulty']
-    }
-
 
 if __name__=="__main__":
-    print("[testing helper functions]")
-
-    print(" -- testing all riddles")
-    all_riddles = get_all_riddles()
-    for riddle in all_riddles[0:3]:
-        print(riddle['id'], riddle['question'])
-
-    print()
-    print(" -- testing one riddle")
+    print("-- testing helper functions")
 
     riddle = get_one_riddle(2)
-    print(riddle['question'])
     print(json_riddle(riddle))
+
+
+    for riddle in get_riddles_by_difficulty('easy'):
+        print(riddle[0],riddle[1])

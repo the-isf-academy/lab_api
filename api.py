@@ -29,10 +29,6 @@ def api_all_riddles():
 
 @app.route(f'/{BASE_URL}/new', methods=['POST'])
 def api_new_riddle():
-    # error handeling if payload is not provided
-    if 'question' not in  request.args or 'answer' not in request.args:
-        return {'error': 'question and answer are required.'}, 400 
-    
     # get payload 
     question = request.args['question']
     answer = request.args['answer']
@@ -44,6 +40,16 @@ def api_new_riddle():
     return {
         'message': 'Riddle added successfully.',
         'question': json_riddle(riddle)}, 201
+
+# TODO: write /one endpoint
+
+
+
+# TODO: write /difficulty endpoint
+
+
+
+# TODO: write /guess endpoint
 
 
 
