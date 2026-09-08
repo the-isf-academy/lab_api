@@ -2,8 +2,9 @@ import sqlite3
 
 # SQL HELPERS
 
-
 def get_all_riddles():
+    """Returns all riddles"""
+
     db_connection = sqlite3.connect("database.db")
     db_cursor = db_connection.cursor()
 
@@ -14,6 +15,8 @@ def get_all_riddles():
     return all_riddles
 
 def get_one_riddle(riddle_id):
+    """Returns one riddle with a specific ID"""
+
     db_connection = sqlite3.connect("database.db")
     db_cursor = db_connection.cursor()
 
@@ -24,6 +27,9 @@ def get_one_riddle(riddle_id):
     return one_riddle
 
 def get_riddles_by_difficulty(difficulty):
+    """Returns all riddles with a specific difficulty level"""
+
+
     db_connection = sqlite3.connect("database.db")
     db_cursor = db_connection.cursor()
 
@@ -34,14 +40,14 @@ def get_riddles_by_difficulty(difficulty):
     return riddles
 
 def new_riddle(question, answer):
+    """Adds a new riddle to the database and returns that riddle"""
+
     db_connection = sqlite3.connect("database.db")
     db_cursor = db_connection.cursor()
     
     db_cursor.execute("INSERT INTO riddles (question, answer) VALUES (?, ?)",(question, answer))
 
-
     newest_riddle = db_cursor.execute("SELECT * FROM riddles order by id desc limit 1").fetchone()
-
 
     db_connection.commit()
 
@@ -50,6 +56,9 @@ def new_riddle(question, answer):
 
 
 def update_riddle_guessed(riddle_id, is_correct):
+    """Updates the riddle based on if the guess is correct or incorrect"""
+
+
     db_connection = sqlite3.connect("database.db")
     db_cursor = db_connection.cursor()
 
@@ -63,6 +72,8 @@ def update_riddle_guessed(riddle_id, is_correct):
     db_connection.close()
 
 def update_riddle_difficulty(riddle_id): 
+    """Updates the riddle difficulty"""
+
     db_connection = sqlite3.connect("database.db")
     db_cursor = db_connection.cursor()
 
@@ -87,6 +98,8 @@ def update_riddle_difficulty(riddle_id):
 # JSON FORMATTING HELPERS
 
 def json_riddle(riddle):
+    """Returns riddle formatted as JSON with all columns"""
+
     return {
         'id': riddle[0],
         'question': riddle[1],
@@ -97,6 +110,8 @@ def json_riddle(riddle):
     }
 
 def json_riddle_answerless(riddle):
+    """Returns riddle formatted as JSON with without the answer"""
+
     return {
         'id': riddle[0],
         'question': riddle[1],
